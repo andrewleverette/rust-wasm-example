@@ -2,7 +2,7 @@ use js_sys;
 use fixedbitset::FixedBitSet;
 use wasm_bindgen::prelude::*;
 
-#[macro_use]
+//#[macro_use]
 mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -76,6 +76,8 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
+        let _timer = utils::Timer::new("Universe::tick");
+        
         let mut next = self.cells.clone();
 
         for row in 0..self.height {
