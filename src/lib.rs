@@ -2,6 +2,7 @@ use js_sys;
 use fixedbitset::FixedBitSet;
 use wasm_bindgen::prelude::*;
 
+#[macro_use]
 mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -20,6 +21,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
+        utils::set_panic_hook();
+
         let width = 64;
         let height = 64;
 
@@ -67,6 +70,11 @@ impl Universe {
         self.cells.set_range(0..size, false);
     }
 
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells.set(idx, !self.cells[idx]);  
+    }
+
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
@@ -75,6 +83,14 @@ impl Universe {
                 let idx = self.get_index(row, col);
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
+
+                // log!(
+                //     "cell[{}, {}] is initially {:?} and has {} live neighbors",
+                //     row,
+                //     col,
+                //     cell,
+                //     live_neighbors
+                // );
 
                 next.set(idx, match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours
@@ -92,6 +108,8 @@ impl Universe {
                     // All other cells remain in the same state.
                     (otherwise, _) => otherwise,
                 });
+
+                // log!("    it becomes {:?}", next[idx]);
             }
         }
 
